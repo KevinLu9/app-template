@@ -1,0 +1,48 @@
+# Installs a pinned Databricks CLI and runs bundle commands, authenticated through an Azure
+# Resource Manager service connection using workload identity federation (no stored secrets).
+# Expects the `bundle` artifact in $(Pipeline.Workspace)/bundle and the variable group values:
+#   WAREHOUSE_ID, LAKEBASE_INSTANCE, LAKEBASE_DATABASE, APP_USERS_GROUP
+parameters:
+  - name: serviceConnection
+    type: string
+  - name: target
+    type: string
+  - name: commands
+    type: string
+    values: [validate, deploy]
+  - name: cliVersion
+    type: string
+    default: "1.21.0"
+
+steps:
+  - script: |
+      set -euo pipefail
+      v="${{ parameters.cliVersion }}"
+      dir="$(Agent.TempDirectory)/databricks-cli"
+      curl -fsSL -o "$dir.zip" "https://github.com/databricks/cli/releases/download/v${v}/databricks_cli_${v}_linux_amd64.zip"
+      unzip -q -o "$dir.zip" -d "$dir"
+      echo "##vso[task.prependpath]$dir"
+    displayName: Install Databricks CLI ${{ parameters.cliVersion }}
+
+  - task: AzureCLI@2
+    displayName: databricks bundle ${{ parameters.commands }} (${{ parameters.target }})
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      workingDirectory: $(Pipeline.Workspace)/bundle
+      inlineScript: |
+        set -euo pipefail
+        databricks --version
+        databricks bundle validate -t "${{ parameters.target }}"
+        if [ "${{ parameters.commands }}" = "deploy" ]; then
+          databricks bundle deploy -t "${{ parameters.target }}" --auto-approve
+          databricks bundle run app -t "${{ parameters.target }}"
+        fi
+    env:
+      # The CLI reuses the federated Azure CLI login from this task to get a Databricks token.
+      DATABRICKS_AUTH_TYPE: azure-cli
+      BUNDLE_VAR_warehouse_id: $(WAREHOUSE_ID)
+      BUNDLE_VAR_lakebase_instance: $(LAKEBASE_INSTANCE)
+      BUNDLE_VAR_lakebase_database: $(LAKEBASE_DATABASE)
+      BUNDLE_VAR_app_users_group: $(APP_USERS_GROUP)

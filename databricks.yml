@@ -1,0 +1,57 @@
+# Databricks Asset Bundle: one app, four targets.
+#   sandbox  - personal deploys from a laptop (development mode, name-prefixed per user)
+#   dev, staging, prod - deployed only by Azure DevOps (azure-pipelines/cd.yml)
+bundle:
+  name: app-template
+  databricks_cli_version: ">= 1.21.0"
+
+include:
+  - resources/*.yml
+
+# The app is deployed from .build/ (assembled by `npm run build`). It is gitignored, so it
+# must be explicitly included in what the bundle uploads.
+sync:
+  include:
+    - .build/**
+
+variables:
+  app_name:
+    description: App name (lowercase letters, digits, hyphens; max 30 characters).
+    default: app-template
+  warehouse_id:
+    description: SQL warehouse used for Lakehouse queries.
+  lakebase_instance:
+    description: Lakebase database instance name.
+  lakebase_database:
+    description: Database within the Lakebase instance.
+    default: databricks_postgres
+  app_users_group:
+    description: Workspace group allowed to use the app.
+    default: users
+
+targets:
+  sandbox:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-0000000000000000.0.azuredatabricks.net  # TODO: dev workspace URL
+
+  dev:
+    workspace:
+      host: https://adb-0000000000000000.0.azuredatabricks.net  # TODO: dev workspace URL
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      app_name: app-template-dev
+
+  staging:
+    workspace:
+      host: https://adb-1111111111111111.1.azuredatabricks.net  # TODO: staging workspace URL
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      app_name: app-template-stg
+
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-2222222222222222.2.azuredatabricks.net  # TODO: prod workspace URL
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}

@@ -1,0 +1,23 @@
+# Databricks Apps runtime config. Deployed from .build/ (see scripts/build-bundle.mjs).
+# The command does not run in a shell; DATABRICKS_APP_PORT is read in gunicorn.conf.py.
+command: ["gunicorn", "-c", "backend/gunicorn.conf.py", "wsgi:app"]
+
+env:
+  - name: APP_ENV
+    value: production
+  - name: LOG_LEVEL
+    value: INFO
+  # Migrations run once in the gunicorn master before workers start.
+  - name: RUN_MIGRATIONS_ON_START
+    value: "true"
+  # Postgres schema this app owns in Lakebase. Must be unique per app on a shared database.
+  - name: DB_SCHEMA
+    value: app
+  # From the app resource named "sql-warehouse" (resources/app.yml).
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  # Lakebase PGHOST/PGPORT/PGDATABASE/PGUSER/PGSSLMODE are injected by the "lakebase" resource.
+  #
+  # Secrets: add a secret resource in resources/app.yml, then reference it here, e.g.
+  # - name: EXTERNAL_API_KEY
+  #   valueFrom: external-api-key

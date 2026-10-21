@@ -1,0 +1,47 @@
+parameters:
+  - name: pythonVersion
+    type: string
+    default: "3.11"  # matches the Databricks Apps runtime
+  - name: nodeVersion
+    type: string
+    default: "22.x"
+
+jobs:
+  - job: python
+    displayName: Python - lint, test, audit
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: ${{ parameters.pythonVersion }}
+
+      - task: UseNode@1
+        inputs:
+          version: ${{ parameters.nodeVersion }}
+
+      # Same embedded Postgres developers use locally (scripts/db.mjs); no Docker needed.
+      - script: npm ci && npm run db:up
+        displayName: Start local Postgres
+
+      - script: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements-dev.txt
+        displayName: Install dependencies
+
+      - script: .venv/bin/ruff check . && .venv/bin/ruff format --check .
+        displayName: Ruff
+
+      - script: .venv/bin/pytest --junitxml=test-results/python.xml
+        displayName: Pytest
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://app:app@127.0.0.1:5432/app_test
+          REQUIRE_TEST_DATABASE: "1"
+
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: test-results/python.xml
+          testRunTitle: Python
+
+      - script: .venv/bin/pip-audit -r requirements.txt
+        displayName: Dependency audit (pip-audit)

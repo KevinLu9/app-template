@@ -1,0 +1,17 @@
+{
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true
+  },
+  "[typescript][typescriptreact][json][css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "eslint.workingDirectories": [
+    "frontend"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

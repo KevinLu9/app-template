@@ -1,0 +1,49 @@
+# Continuous delivery: build once, then promote the same artifact dev -> staging -> prod.
+# Approvals/checks are configured on the Azure DevOps Environments (staging, prod).
+trigger:
+  branches:
+    include: [main]
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+      - template: templates/build-artifact.yml
+
+  - stage: dev
+    displayName: Deploy dev
+    dependsOn: build
+    jobs:
+      - template: templates/deploy-bundle.yml
+        parameters:
+          target: dev
+          environment: app-template-dev
+          serviceConnection: databricks-dev-wif
+          variableGroup: app-template-dev
+
+  - stage: staging
+    displayName: Deploy staging
+    dependsOn: dev
+    jobs:
+      - template: templates/deploy-bundle.yml
+        parameters:
+          target: staging
+          environment: app-template-staging
+          serviceConnection: databricks-staging-wif
+          variableGroup: app-template-staging
+
+  - stage: prod
+    displayName: Deploy prod
+    dependsOn: staging
+    jobs:
+      - template: templates/deploy-bundle.yml
+        parameters:
+          target: prod
+          environment: app-template-prod
+          serviceConnection: databricks-prod-wif
+          variableGroup: app-template-prod

@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+test-results/
+
+# Node
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Deployment build output (assembled by scripts/build-bundle.mjs)
+.build/
+.databricks/
+
+# Local Postgres data (scripts/db.mjs)
+.local/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

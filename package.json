@@ -1,0 +1,45 @@
+{
+  "name": "app-template",
+  "private": true,
+  "description": "Company standard Databricks App: Vite + React frontend, Flask backend.",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "predev": "npm run db:up && npm run migrate",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node scripts/py.mjs flask --app backend/wsgi.py run --debug --port 8000",
+    "dev:web": "npm run dev -w frontend",
+    "db:up": "node scripts/db.mjs up",
+    "db:down": "node scripts/db.mjs down",
+    "db:status": "node scripts/db.mjs status",
+    "db:reset": "node scripts/db.mjs reset",
+    "migrate": "node scripts/py.mjs alembic -c backend/alembic.ini upgrade head",
+    "migrate:new": "node scripts/py.mjs alembic -c backend/alembic.ini revision --autogenerate -m",
+    "lint": "npm run lint:py && npm run lint:web",
+    "lint:py": "node scripts/py.mjs ruff check . && node scripts/py.mjs ruff format --check .",
+    "lint:web": "npm run lint -w frontend && npm run typecheck -w frontend && npm run format:check -w frontend",
+    "format": "node scripts/py.mjs ruff check --fix . && node scripts/py.mjs ruff format . && npm run format -w frontend",
+    "test": "npm run test:py && npm run test:web",
+    "test:py": "node scripts/py.mjs pytest",
+    "test:web": "npm run test -w frontend",
+    "audit": "node scripts/py.mjs pip_audit -r requirements.txt && npm audit --audit-level=high",
+    "build": "npm run build -w frontend && node scripts/build-bundle.mjs",
+    "deploy:sandbox": "npm run build && databricks bundle deploy -t sandbox && databricks bundle run app -t sandbox"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5",
+    "pg": "^8.23.1"
+  },
+  "optionalDependencies": {
+    "@embedded-postgres/darwin-arm64": "16.14.0-beta.17",
+    "@embedded-postgres/darwin-x64": "16.14.0-beta.17",
+    "@embedded-postgres/linux-arm64": "16.14.0-beta.17",
+    "@embedded-postgres/linux-x64": "16.14.0-beta.17",
+    "@embedded-postgres/windows-x64": "16.14.0-beta.17"
+  }
+}

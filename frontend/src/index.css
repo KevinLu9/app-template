@@ -1,0 +1,187 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+/* Brand typefaces, self-hosted (the CSP blocks third-party font CDNs). */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/source-serif-4";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Ventia theme for shadcn/ui. See docs/BRANDING.md for usage rules.
+ * Change brand values HERE, never in components. Raw palette first, then semantic tokens.
+ */
+:root {
+  /* Ventia palette */
+  --ventia-deep-green: #004825;
+  --ventia-mid-green: #00994d;
+  --ventia-feijoa-green: #a0cd60;
+  --ventia-safety-yellow: #f5e646;
+  --ventia-red-earth: #9e3323;
+  --ventia-plum-purple: #671c32;
+
+  --radius: 0.5rem;
+
+  --background: #ffffff;
+  --foreground: #14201a;
+  --card: #ffffff;
+  --card-foreground: #14201a;
+  --popover: #ffffff;
+  --popover-foreground: #14201a;
+
+  /* Primary actions: deep green with white text (contrast 11:1). */
+  --primary: var(--ventia-deep-green);
+  --primary-foreground: #ffffff;
+  /* shadcn "secondary" is a subtle surface (secondary buttons, badges): a light green tint. */
+  --secondary: #e6f2eb;
+  --secondary-foreground: var(--ventia-deep-green);
+  --muted: #f2f5f3;
+  --muted-foreground: #56665d;
+  --accent: #e6f2eb;
+  --accent-foreground: var(--ventia-deep-green);
+  --destructive: var(--ventia-red-earth);
+  --destructive-foreground: #ffffff;
+  --border: #dbe4de;
+  --input: #dbe4de;
+  --ring: var(--ventia-mid-green);
+
+  /* Brand + status colours (Bootstrap secondary/success/warning/info equivalents). */
+  --brand: var(--ventia-mid-green);
+  --brand-foreground: #ffffff;
+  --success: var(--ventia-feijoa-green);
+  --success-foreground: #14201a;
+  --warning: var(--ventia-safety-yellow);
+  --warning-foreground: #14201a;
+  --info: var(--ventia-plum-purple);
+  --info-foreground: #ffffff;
+
+  /* Charts: primary palette leads, secondary colours after. Feijoa is last because it is
+     faint on white (1.8:1); yellow (1.3:1) is left out, so use it for highlights only. */
+  --chart-1: var(--ventia-deep-green);
+  --chart-2: var(--ventia-mid-green);
+  --chart-3: var(--ventia-plum-purple);
+  --chart-4: var(--ventia-red-earth);
+  --chart-5: var(--ventia-feijoa-green);
+
+  /* Sidebar: deep green panel, the main brand surface of the app shell. */
+  --sidebar: var(--ventia-deep-green);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--ventia-feijoa-green);
+  --sidebar-primary-foreground: var(--ventia-deep-green);
+  --sidebar-accent: #0a6338;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #0d5a34;
+  --sidebar-ring: var(--ventia-feijoa-green);
+}
+
+.dark {
+  --background: #0b1510;
+  --foreground: #e9f1ec;
+  --card: #111d17;
+  --card-foreground: #e9f1ec;
+  --popover: #111d17;
+  --popover-foreground: #e9f1ec;
+
+  /* Deep green has too little contrast on a dark background, so mid green leads here. */
+  --primary: var(--ventia-mid-green);
+  --primary-foreground: #04130b;
+  --secondary: #1a2b22;
+  --secondary-foreground: #e9f1ec;
+  --muted: #16241c;
+  --muted-foreground: #9db0a5;
+  --accent: #1a2e23;
+  --accent-foreground: #e9f1ec;
+  --destructive: #c44a35;
+  --destructive-foreground: #ffffff;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
+  --ring: var(--ventia-mid-green);
+
+  --brand: var(--ventia-mid-green);
+  --brand-foreground: #04130b;
+  --success: var(--ventia-feijoa-green);
+  --success-foreground: #0b1510;
+  --warning: var(--ventia-safety-yellow);
+  --warning-foreground: #0b1510;
+  --info: #cc6585;
+  --info-foreground: #0b1510;
+
+  --chart-1: var(--ventia-mid-green);
+  --chart-2: var(--ventia-feijoa-green);
+  --chart-3: #5fc792;
+  --chart-4: #cc6585;
+  --chart-5: #c44a35;
+
+  --sidebar: #002d17;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--ventia-feijoa-green);
+  --sidebar-primary-foreground: #002d17;
+  --sidebar-accent: var(--ventia-deep-green);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 10%);
+  --sidebar-ring: var(--ventia-feijoa-green);
+}
+
+@theme inline {
+  /* Inter: body copy, subheadings, numbers, charts. Source Serif 4: headlines and titles. */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Source Serif 4 Variable", ui-serif, Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  /* Headlines and main titles use the serif; subheadings (h3+, card titles) stay Inter. */
+  h1,
+  h2 {
+    @apply font-heading tracking-tight;
+  }
+}

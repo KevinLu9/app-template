@@ -1,0 +1,28 @@
+# Builds the frontend, assembles .build/ and publishes the deployable bundle artifact:
+#   databricks.yml, resources/, .build/
+parameters:
+  - name: nodeVersion
+    type: string
+    default: "22.x"
+
+jobs:
+  - job: build
+    displayName: Build deployable bundle
+    steps:
+      - task: UseNode@1
+        inputs:
+          version: ${{ parameters.nodeVersion }}
+
+      - script: npm ci && npm run build
+        displayName: Build frontend and assemble .build/
+
+      - script: |
+          set -euo pipefail
+          out="$(Build.ArtifactStagingDirectory)/bundle"
+          mkdir -p "$out"
+          cp -R databricks.yml resources .build "$out/"
+        displayName: Stage bundle files
+
+      - publish: $(Build.ArtifactStagingDirectory)/bundle
+        artifact: bundle
+        displayName: Publish artifact

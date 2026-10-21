@@ -1,0 +1,31 @@
+# PR validation: lint, test, audit, build, and validate the bundle against dev.
+# Set as a build validation policy on the main branch.
+trigger: none
+
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - template: templates/python-checks.yml
+  - template: templates/frontend-checks.yml
+  - template: templates/build-artifact.yml
+  - template: templates/dev-env-check.yml
+
+  - job: bundle_validate
+    displayName: Validate bundle (dev)
+    dependsOn: build
+    variables:
+      - group: app-template-dev
+    steps:
+      - checkout: none
+      - download: current
+        artifact: bundle
+      - template: templates/bundle-steps.yml
+        parameters:
+          serviceConnection: databricks-dev-wif
+          target: dev
+          commands: validate

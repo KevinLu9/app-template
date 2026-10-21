@@ -1,0 +1,33 @@
+parameters:
+  - name: nodeVersion
+    type: string
+    default: "22.x"  # matches the Databricks Apps runtime
+
+jobs:
+  - job: frontend
+    displayName: Frontend - lint, typecheck, test, audit
+    steps:
+      - task: UseNode@1
+        inputs:
+          version: ${{ parameters.nodeVersion }}
+
+      - script: npm ci
+        displayName: npm ci
+
+      - script: npm run lint -w frontend && npm run format:check -w frontend
+        displayName: ESLint + Prettier
+
+      - script: npm run typecheck -w frontend
+        displayName: TypeScript
+
+      - script: npm run test -w frontend -- --reporter=default --reporter=junit --outputFile.junit=test-results/frontend.xml
+        displayName: Vitest
+
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: frontend/test-results/frontend.xml
+          testRunTitle: Frontend
+
+      - script: npm audit --audit-level=high --omit=dev
+        displayName: Dependency audit (npm)

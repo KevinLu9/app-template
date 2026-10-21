@@ -1,0 +1,36 @@
+resources:
+  apps:
+    app:
+      name: ${var.app_name}
+      description: Company app template (Vite + React, Flask)
+      # Built by `npm run build`; contains backend/, frontend/dist/, app.yaml, requirements.txt.
+      source_code_path: ../.build
+
+      # User authorization (OBO). Keep to the minimum your app needs; users consent to these.
+      # Scope reference: https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth
+      user_api_scopes:
+        - sql
+        - iam.current-user:read
+        - iam.access-control:read
+
+      # Resources are granted to the app's service principal and exposed via app.yaml valueFrom.
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: lakebase
+          database:
+            instance_name: ${var.lakebase_instance}
+            database_name: ${var.lakebase_database}
+            permission: CAN_CONNECT_AND_CREATE
+        # Example secret (then reference it in app.yaml with valueFrom: external-api-key):
+        # - name: external-api-key
+        #   secret:
+        #     scope: my-app-secrets
+        #     key: external-api-key
+        #     permission: READ
+
+      permissions:
+        - level: CAN_USE
+          group_name: ${var.app_users_group}

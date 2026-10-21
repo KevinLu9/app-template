@@ -1,0 +1,48 @@
+# Developers work on Windows and macOS: prove `npm run setup`, lint, test and build work on both.
+# Includes the Postgres-backed tests, using the same embedded Postgres as local development.
+parameters:
+  - name: pythonVersion
+    type: string
+    default: "3.11"
+  - name: nodeVersion
+    type: string
+    default: "22.x"
+
+jobs:
+  - job: dev_env
+    displayName: Local dev workflow
+    strategy:
+      matrix:
+        windows:
+          vmImage: windows-latest
+        macos:
+          vmImage: macOS-latest
+    pool:
+      vmImage: $(vmImage)
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: ${{ parameters.pythonVersion }}
+
+      - task: UseNode@1
+        inputs:
+          version: ${{ parameters.nodeVersion }}
+
+      - script: npm run setup
+        displayName: npm run setup
+        env:
+          PYTHON: python  # the interpreter selected by UsePythonVersion
+
+      - script: npm run db:up && npm run migrate
+        displayName: npm run db:up + migrate
+
+      - script: npm run lint
+        displayName: npm run lint
+
+      - script: npm run test
+        displayName: npm run test
+        env:
+          REQUIRE_TEST_DATABASE: "1"
+
+      - script: npm run build
+        displayName: npm run build

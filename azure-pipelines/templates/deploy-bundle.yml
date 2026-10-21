@@ -1,0 +1,29 @@
+# One deployment job per environment. Bind approvals and checks to the ADO Environment.
+parameters:
+  - name: target
+    type: string
+  - name: environment
+    type: string
+  - name: serviceConnection
+    type: string
+  - name: variableGroup
+    type: string
+
+jobs:
+  - deployment: deploy
+    displayName: Deploy to ${{ parameters.target }}
+    environment: ${{ parameters.environment }}
+    variables:
+      - group: ${{ parameters.variableGroup }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            # Deployment jobs download pipeline artifacts to $(Pipeline.Workspace) automatically.
+            - download: current
+              artifact: bundle
+            - template: bundle-steps.yml
+              parameters:
+                serviceConnection: ${{ parameters.serviceConnection }}
+                target: ${{ parameters.target }}
+                commands: deploy
